@@ -1,55 +1,74 @@
-package com.salva.test1
+package com.example.scorekeeper
 
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
-
     private var scoreTeamA = 0
     private var scoreTeamB = 0
+    private lateinit var scoreTeamATextView: TextView
+    private lateinit var scoreTeamBTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        val scoreATextView = findViewById<TextView>(R.id.scoreA)
-        val scoreBTextView = findViewById<TextView>(R.id.scoreB)
+        // Inisialisasi UI
+        scoreTeamATextView = findViewById(R.id.score_team_a)
+        scoreTeamBTextView = findViewById(R.id.score_team_b)
+        val btnPlus1TeamA: Button = findViewById(R.id.btn_plus1_team_a)
+        val btnPlus2TeamA: Button = findViewById(R.id.btn_plus2_team_a)
+        val btnPlus1TeamB: Button = findViewById(R.id.btn_plus1_team_b)
+        val btnPlus2TeamB: Button = findViewById(R.id.btn_plus2_team_b)
+        val btnReset: Button = findViewById(R.id.btn_reset)
 
-        val buttonA1 = findViewById<Button>(R.id.buttonA1)
-        val buttonA2 = findViewById<Button>(R.id.buttonA2)
-        val buttonB1 = findViewById<Button>(R.id.buttonB1)
-        val buttonB2 = findViewById<Button>(R.id.buttonB2)
-        val resetButton = findViewById<Button>(R.id.resetButton)
+        // Restore skor jika layar diputar
+        savedInstanceState?.let {
+            scoreTeamA = it.getInt("scoreTeamA")
+            scoreTeamB = it.getInt("scoreTeamB")
+            updateScores()
+        }
 
-        buttonA1.setOnClickListener {
+        // Event klik tombol
+        btnPlus1TeamA.setOnClickListener {
             scoreTeamA += 1
-            scoreATextView.text = scoreTeamA.toString()
+            updateScores()
         }
 
-        buttonA2.setOnClickListener {
+        btnPlus2TeamA.setOnClickListener {
             scoreTeamA += 2
-            scoreATextView.text = scoreTeamA.toString()
+            updateScores()
         }
 
-        buttonB1.setOnClickListener {
+        btnPlus1TeamB.setOnClickListener {
             scoreTeamB += 1
-            scoreBTextView.text = scoreTeamB.toString()
+            updateScores()
         }
 
-        buttonB2.setOnClickListener {
+        btnPlus2TeamB.setOnClickListener {
             scoreTeamB += 2
-            scoreBTextView.text = scoreTeamB.toString()
+            updateScores()
         }
 
-        resetButton.setOnClickListener {
+        btnReset.setOnClickListener {
             scoreTeamA = 0
             scoreTeamB = 0
-            scoreATextView.text = scoreTeamA.toString()
-            scoreBTextView.text = scoreTeamB.toString()
+            updateScores()
         }
+    }
+
+    // Simpan data saat layar diputar
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("scoreTeamA", scoreTeamA)
+        outState.putInt("scoreTeamB", scoreTeamB)
+    }
+
+    // Update tampilan skor
+    private fun updateScores() {
+        scoreTeamATextView.text = scoreTeamA.toString()
+        scoreTeamBTextView.text = scoreTeamB.toString()
     }
 }

@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.salva.test1"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.salva.test1"
         minSdk = 27
-        targetSdk = 35
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
