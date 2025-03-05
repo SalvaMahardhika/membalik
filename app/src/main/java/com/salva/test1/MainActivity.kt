@@ -1,4 +1,4 @@
-package com.example.scorekeeper
+package com.salva.test1
 
 import android.os.Bundle
 import android.widget.Button
