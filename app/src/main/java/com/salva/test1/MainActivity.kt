@@ -26,8 +26,8 @@ class MainActivity : AppCompatActivity() {
 
         // Restore skor jika layar diputar
         savedInstanceState?.let {
-            scoreTeamA = it.getInt("scoreTeamA")
-            scoreTeamB = it.getInt("scoreTeamB")
+            scoreTeamA = it.getInt("scoreTeamA", 0)
+            scoreTeamB = it.getInt("scoreTeamB", 0)
             updateScores()
         }
 
