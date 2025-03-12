@@ -3,97 +3,111 @@ package com.salva.test1
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
-    private var scoreTeamA = 0
-    private var scoreTeamB = 0
-    private lateinit var scoreTeamATextView: TextView
-    private lateinit var scoreTeamBTextView: TextView
-    private lateinit var resultTextView: TextView
-    private lateinit var btnPlus1TeamA: Button
-    private lateinit var btnPlus2TeamA: Button
-    private lateinit var btnPlus1TeamB: Button
-    private lateinit var btnPlus2TeamB: Button
+
+    private lateinit var scoreTeamA: TextView
+    private lateinit var scoreTeamB: TextView
+    private lateinit var resultText: TextView
+    private lateinit var btnPlus1A: Button
+    private lateinit var btnPlus2A: Button
+    private lateinit var btnPlus1B: Button
+    private lateinit var btnPlus2B: Button
     private lateinit var btnReset: Button
+
+    private var scoreA = 0
+    private var scoreB = 0
+    private val winningScore = 21  // Skor kemenangan
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Inisialisasi UI
-        scoreTeamATextView = findViewById(R.id.score_team_a)
-        scoreTeamBTextView = findViewById(R.id.score_team_b)
-        resultTextView = findViewById(R.id.result_text)
-        btnPlus1TeamA = findViewById(R.id.btn_plus1_team_a)
-        btnPlus2TeamA = findViewById(R.id.btn_plus2_team_a)
-        btnPlus1TeamB = findViewById(R.id.btn_plus1_team_b)
-        btnPlus2TeamB = findViewById(R.id.btn_plus2_team_b)
+        // Inisialisasi View
+        scoreTeamA = findViewById(R.id.score_team_a)
+        scoreTeamB = findViewById(R.id.score_team_b)
+        resultText = findViewById(R.id.result_text)
+        btnPlus1A = findViewById(R.id.btn_plus1_team_a)
+        btnPlus2A = findViewById(R.id.btn_plus2_team_a)
+        btnPlus1B = findViewById(R.id.btn_plus1_team_b)
+        btnPlus2B = findViewById(R.id.btn_plus2_team_b)
         btnReset = findViewById(R.id.btn_reset)
 
-        // Restore skor jika layar diputar
-        savedInstanceState?.let {
-            scoreTeamA = it.getInt("scoreTeamA", 0)
-            scoreTeamB = it.getInt("scoreTeamB", 0)
-            updateScores()
-        }
-
-        // Event klik tombol
-        btnPlus1TeamA.setOnClickListener { updateScore(1, "A") }
-        btnPlus2TeamA.setOnClickListener { updateScore(2, "A") }
-        btnPlus1TeamB.setOnClickListener { updateScore(1, "B") }
-        btnPlus2TeamB.setOnClickListener { updateScore(2, "B") }
-
-        btnReset.setOnClickListener {
-            scoreTeamA = 0
-            scoreTeamB = 0
-            resultTextView.text = ""
-            enableButtons(true)
-            updateScores()
-        }
-    }
-
-    // Simpan data saat layar diputar
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putInt("scoreTeamA", scoreTeamA)
-        outState.putInt("scoreTeamB", scoreTeamB)
+        // Tambahkan event listener ke tombol
+        btnPlus1A.setOnClickListener { updateScore("A", 1) }
+        btnPlus2A.setOnClickListener { updateScore("A", 2) }
+        btnPlus1B.setOnClickListener { updateScore("B", 1) }
+        btnPlus2B.setOnClickListener { updateScore("B", 2) }
+        btnReset.setOnClickListener { resetGame() }
     }
 
     // Fungsi untuk memperbarui skor
-    private fun updateScore(points: Int, team: String) {
+    private fun updateScore(team: String, points: Int) {
+        if (scoreA >= winningScore || scoreB >= winningScore) return // Jika ada pemenang, tombol dinonaktifkan
+
         if (team == "A") {
-            scoreTeamA += points
+            scoreA += points
+            scoreTeamA.text = scoreA.toString()
         } else {
-            scoreTeamB += points
+            scoreB += points
+            scoreTeamB.text = scoreB.toString()
         }
 
-        updateScores()
         checkWinner()
     }
 
-    // Periksa apakah ada pemenang
+    // Fungsi untuk mengecek pemenang
     private fun checkWinner() {
-        if ((scoreTeamA >= 21 && scoreTeamA >= scoreTeamB + 2) || scoreTeamA == 30) {
-            resultTextView.text = "Team A Wins!"
-            enableButtons(false)
-        } else if ((scoreTeamB >= 21 && scoreTeamB >= scoreTeamA + 2) || scoreTeamB == 30) {
-            resultTextView.text = "Team B Wins!"
-            enableButtons(false)
+        when {
+            scoreA >= winningScore -> {
+                showWinnerDialog("Team A")
+            }
+            scoreB >= winningScore -> {
+                showWinnerDialog("Team B")
+            }
         }
     }
 
-    // Perbarui tampilan skor
-    private fun updateScores() {
-        scoreTeamATextView.text = scoreTeamA.toString()
-        scoreTeamBTextView.text = scoreTeamB.toString()
+    // Menampilkan dialog pemenang
+    private fun showWinnerDialog(winner: String) {
+        resultText.text = "$winner Wins!"
+        resultText.visibility = TextView.VISIBLE
+
+        // Tampilkan Alert Dialog
+        AlertDialog.Builder(this)
+            .setTitle("Game Over")
+            .setMessage("$winner telah menang dengan skor $winningScore!")
+            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+            .show()
+
+        // Matikan tombol jika ada pemenang
+        disableButtons()
     }
 
-    // Aktifkan/nonaktifkan tombol setelah game selesai
-    private fun enableButtons(enable: Boolean) {
-        btnPlus1TeamA.isEnabled = enable
-        btnPlus2TeamA.isEnabled = enable
-        btnPlus1TeamB.isEnabled = enable
-        btnPlus2TeamB.isEnabled = enable
+    // Menonaktifkan tombol tambah skor
+    private fun disableButtons() {
+        btnPlus1A.isEnabled = false
+        btnPlus2A.isEnabled = false
+        btnPlus1B.isEnabled = false
+        btnPlus2B.isEnabled = false
+    }
+
+    // Reset permainan
+    private fun resetGame() {
+        scoreA = 0
+        scoreB = 0
+        scoreTeamA.text = "0"
+        scoreTeamB.text = "0"
+        resultText.text = ""
+        resultText.visibility = TextView.GONE
+
+        // Aktifkan kembali tombol
+        btnPlus1A.isEnabled = true
+        btnPlus2A.isEnabled = true
+        btnPlus1B.isEnabled = true
+        btnPlus2B.isEnabled = true
     }
 }
