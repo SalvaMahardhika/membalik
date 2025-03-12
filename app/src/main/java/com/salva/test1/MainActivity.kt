@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 
@@ -18,9 +19,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnPlus2B: Button
     private lateinit var btnReset: Button
 
-    private var scoreA = 0
-    private var scoreB = 0
-    private val winningScore = 21  // Skor kemenangan
+    // Inisialisasi ViewModel
+    private val scoreViewModel: ScoreViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,58 +36,45 @@ class MainActivity : AppCompatActivity() {
         btnPlus2B = findViewById(R.id.btn_plus2_team_b)
         btnReset = findViewById(R.id.btn_reset)
 
-        // Tambahkan event listener ke tombol
-        btnPlus1A.setOnClickListener { updateScore("A", 1) }
-        btnPlus2A.setOnClickListener { updateScore("A", 2) }
-        btnPlus1B.setOnClickListener { updateScore("B", 1) }
-        btnPlus2B.setOnClickListener { updateScore("B", 2) }
+        // Mengamati perubahan skor Team A
+        scoreViewModel.scoreA.observe(this) { score ->
+            scoreTeamA.text = score.toString()
+        }
+
+        // Mengamati perubahan skor Team B
+        scoreViewModel.scoreB.observe(this) { score ->
+            scoreTeamB.text = score.toString()
+        }
+
+        // Mengamati pemenang
+        scoreViewModel.winner.observe(this) { winner ->
+            if (winner != null) {
+                showWinnerDialog(winner)
+                disableButtons()
+            }
+        }
+
+        // Event listener tombol
+        btnPlus1A.setOnClickListener { scoreViewModel.updateScore("A", 1) }
+        btnPlus2A.setOnClickListener { scoreViewModel.updateScore("A", 2) }
+        btnPlus1B.setOnClickListener { scoreViewModel.updateScore("B", 1) }
+        btnPlus2B.setOnClickListener { scoreViewModel.updateScore("B", 2) }
         btnReset.setOnClickListener { resetGame() }
     }
 
-    // Fungsi untuk memperbarui skor
-    private fun updateScore(team: String, points: Int) {
-        if (scoreA >= winningScore || scoreB >= winningScore) return // Jika ada pemenang, tombol dinonaktifkan
-
-        if (team == "A") {
-            scoreA += points
-            scoreTeamA.text = scoreA.toString()
-        } else {
-            scoreB += points
-            scoreTeamB.text = scoreB.toString()
-        }
-
-        checkWinner()
-    }
-
-    // Fungsi untuk mengecek pemenang
-    private fun checkWinner() {
-        when {
-            scoreA >= winningScore -> {
-                showWinnerDialog("Team A")
-            }
-            scoreB >= winningScore -> {
-                showWinnerDialog("Team B")
-            }
-        }
-    }
-
-    // Menampilkan dialog pemenang
+    // Menampilkan dialog jika ada pemenang
     private fun showWinnerDialog(winner: String) {
         resultText.text = "$winner Wins!"
         resultText.visibility = TextView.VISIBLE
 
-        // Tampilkan Alert Dialog
         AlertDialog.Builder(this)
             .setTitle("Game Over")
-            .setMessage("$winner telah menang dengan skor $winningScore!")
+            .setMessage("$winner menang dengan skor 21!")
             .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
             .show()
-
-        // Matikan tombol jika ada pemenang
-        disableButtons()
     }
 
-    // Menonaktifkan tombol tambah skor
+    // Menonaktifkan tombol saat ada pemenang
     private fun disableButtons() {
         btnPlus1A.isEnabled = false
         btnPlus2A.isEnabled = false
@@ -97,14 +84,10 @@ class MainActivity : AppCompatActivity() {
 
     // Reset permainan
     private fun resetGame() {
-        scoreA = 0
-        scoreB = 0
-        scoreTeamA.text = "0"
-        scoreTeamB.text = "0"
+        scoreViewModel.resetGame()
         resultText.text = ""
         resultText.visibility = TextView.GONE
 
-        // Aktifkan kembali tombol
         btnPlus1A.isEnabled = true
         btnPlus2A.isEnabled = true
         btnPlus1B.isEnabled = true
