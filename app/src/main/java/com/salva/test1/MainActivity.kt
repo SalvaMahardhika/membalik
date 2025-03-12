@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
 
         AlertDialog.Builder(this)
             .setTitle("Game Over")
-            .setMessage("$winner menang dengan skor 21!")
+            .setMessage("$winner menang dengan skor 25 lurr!")
             .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
             .show()
     }

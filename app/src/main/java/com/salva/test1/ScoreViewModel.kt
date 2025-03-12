@@ -13,7 +13,7 @@ class ScoreViewModel : ViewModel() {
     val scoreB: LiveData<Int> = _scoreB
     val winner: LiveData<String?> = _winner
 
-    private val winningScore = 21
+    private val winningScore = 25
 
     // Fungsi untuk menambah skor
     fun updateScore(team: String, points: Int) {
